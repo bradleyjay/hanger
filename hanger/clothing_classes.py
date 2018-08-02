@@ -8,8 +8,8 @@ class Article:
         name =None,
         color = None, 
         material=None,
-        prof_cas=0,
-        season= {'Spring/Fall': 1, 'Summer': 0, 'Winter': 0},
+        season= {'Spring/Fall': 1, 'Summer': 0, 'Winter': 0}, #might want to do this like occasion
+        occasion =[None],
         last_worn= datetime.date.today() - datetime.timedelta(days = 21), # initialize all clothes as worn 3 weeks back (ready for wear)
         waterproof=0,
 
@@ -28,10 +28,10 @@ class Article:
         self.color = color
         self.material = material
         self.waterproof = waterproof # 0: no/doesn't matter. -1: vulnerable to water 1: waterproof
+        self.occasion = occasion
         self.last_worn = last_worn
         
         # algo stats
-        self.prof_cas = prof_cas # -10: Very Professional, 10: Very Casual
         self.season = season
 
         # always none to start
@@ -46,6 +46,7 @@ class Article:
             "Material: " + str(self.material) + '\n',
             "Waterproof: " + str(self.waterproof) + '\n',
             "Last Worn: " + str(self.last_worn) + '\n',
+            "Occasion: " + str(self.occasion),
             ]
         return ''.join(info)
         
