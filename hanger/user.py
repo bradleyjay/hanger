@@ -1,7 +1,7 @@
 import copy
 import fake_lib
 import random
-
+import hanger_priority_queue
 '''
 
 Contains classes and functions to create a user, populate their closet, 
@@ -29,7 +29,7 @@ class Admin:
     def del_user(self, user_id):
         for user in self.user_list:
             if user.id == user_id:
-                user = None  # is this how delete works?
+                user = None  # is this how delete works? (In python, not sql probs.)
 
 
 class User:
@@ -37,28 +37,33 @@ class User:
         self.name = name
         self.user_id = user_id
 
-        self.outerwear = []
-        self.top = []
-        self.bottom = []
-        self.shoe = []
-        
+        self.outerwear = hanger_priority_queue.priority_queue()
+        self.top = hanger_priority_queue.priority_queue()
+        self.bottom = hanger_priority_queue.priority_queue()
+        self.shoe = hanger_priority_queue.priority_queue()
+
         self.closet = [self.outerwear, self.top, self.bottom, self.shoe]
 
     def add_article(self, article):
         if article != None:
-            if article.ctype == 'outerwear': self.closet[0].append(article)
-            if article.ctype == 'top': self.closet[1].append(article)
-            if article.ctype == 'bottom': self.closet[2].append(article)
-            if article.ctype == 'shoe': self.closet[3].append(article)
+            # each closet slot is a priority queue - calls insert() method 
+            # to add to the queue
+            if article.ctype == 'outerwear': self.closet[0].insert(article)
+            if article.ctype == 'top': self.closet[1].insert(article)
+            if article.ctype == 'bottom': self.closet[2].insert(article)
+            if article.ctype == 'shoe': self.closet[3].insert(article)
 
     def disp_closet(self):
         if self.closet != None:
             for kind in self.closet:
-                for article in kind:
-                    if article.ctype != None:
+                for article in kind.head_list:
+                    if article == 0:
+                        pass  # skip head list entry 0
+                    elif article.ctype != None:
                         print(article)
+                        print('\n')
                     else:
-                        print('Error.')
+                        print('Error: Missing entry.')
 
 
     def __str__(self):
@@ -145,15 +150,42 @@ class User:
 
         selected_item = None  # default
 
-        for item in closet[s]:
-            if occasion in item.occasion:              # proper occasion?
-                if item.season[weather_today] == 1:     # season in dict = 1?
-                    if clashes == None:
-                        if matches == True:
-                            selected_item = item
-                            closet[s].remove(item)
 
-        return selected_item
+        # old way - iterate through list to find matching item
+        # for item in closet[s].head_list:
+        #     if item == 0:
+        #         pass # skip first entry in heap, it's a placeholder equal to 0
+        #     elif occasion in item.occasion:              # proper occasion?
+        #         if item.season[weather_today] == 1:     # season in dict = 1?
+        #             if clashes == None:
+        #                 if matches == True:
+        #                     selected_item = item
+        #                     closet[s].remove(item)
+
+        # now, del_min til you hit a match:
+        found = False
+        while found == False:
+        popped = closet[s].del_min()
+        if popped == None:
+            # if there's nothing in the list, no article to choose
+            break
+        elif occasion in item.occasion:              # proper occasion?
+            if item.season[weather_today] == 1:     # season in dict = 1?
+                if clashes == None:
+                    if matches == True:
+                        selected_item = item
+                        
+                        # since selected, update last worn to NOW, add at end of PQ
+                        item.last_worn = datetime.date.today()
+                        closet[s].insert(item)
+
+                        ### UH OH, bigger problem. Pointer to item won't work, 
+                        ## and this isn't modifying the queue here, it's the COPY.
+                        ## This needs to just be a queue, enough already.
+
+        return selected_item # for now, if this ends up being None, that's ok. 
+        # later, needs some mechanism to not just pick the first good one, 
+        # and also not to just take it straight away.
 
     def print_outfit(self, outfit, outfit_number):
         if outfit != None:

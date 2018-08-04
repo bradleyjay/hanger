@@ -18,33 +18,126 @@ def fake_mode(admin):
     return print('New user: ' + new.name)
 
 def fill_closet(user):
-    ## fills fake closet for fake user
-
-    ## outerwear
-    a = cc.Jacket(name = 'Denim Jacket', color = 'blue', material = 'denim', occasion = ['casual'])
-    b = cc.Blazer(name = 'Fancy Blazer', color = 'black', material = 'suede', 
-        waterproof = -1, occasion=['party','work'])
+    '''
+    fills fake closet for fake user. Uses random last_worn values to give the
+    priority queue something to order by
+    '''
     
+    ###############
+    #  outerwear  #
+    ###############
 
-    ## top
+    a = cc.Jacket(
+        name = 'Denim Jacket', 
+        color = 'blue', 
+        material = 'denim', 
+        occasion = ['casual'], 
+        last_worn= datetime.date.today() - datetime.timedelta(days = random.randint(0,30)),
+        )
 
-    c = cc.Shirt(name = 'Radiohead Tee', color = 'gray', occasion=['casual','workout'])
+    b = cc.Blazer(
+        name = 'Fancy Blazer', 
+        color = 'black', 
+        material = 'suede', 
+        waterproof = -1, 
+        occasion=['party','work'],
+        last_worn= datetime.date.today() - datetime.timedelta(days = random.randint(0,30)),
+        )
+    
+    #########
+    #  top  #
+    #########
 
-    d = cc.Blouse(name = 'Light Blouse', color = 'peach', material = 'cotton', 
-        season= {'Spring/Fall': 0, 'Summer': 1, 'Winter': 0}, occasion = ['casual','party'])
-    e = cc.Shirt(name = 'Heavy Sweater', color = 'white', material = 'wool', 
-        season= {'Spring/Fall': 0, 'Summer': 0, 'Winter': 1}, occasion = ['casual','work','party'])
+    c = cc.Shirt(
+        name = 'Radiohead Tee', 
+        color = 'gray', 
+        occasion=['casual','workout'],
+        last_worn= datetime.date.today() - datetime.timedelta(days = random.randint(0,30)),
+        )
 
-    ## bottom
-    f = cc.Tights(name = 'Yoga Pants', color = 'black', occasion = ['casual', 'workout','party'])
-    g = cc.Skirt(name = 'Frilly Skirt', color = 'white', season= {'Spring/Fall': 0, 'Summer': 1, 'Winter': 0}, occasion = ['casual','party'])
-    h = cc.Pants(name = 'Skinny Jeans', color = 'black', occasion = ['casual','party'])
+    d = cc.Blouse(
+        name = 'Light Blouse', 
+        color = 'peach', 
+        material = 'cotton', 
+        season= {'Spring/Fall': 0, 'Summer': 1, 'Winter': 0}, 
+        occasion = ['casual','party'],
+        last_worn= datetime.date.today() - datetime.timedelta(days = random.randint(0,30)),
+        )
 
-    ## shoes
-    i = cc.Sneaker(name = 'Converse', color = 'blue', season = {'Spring/Fall': 1, 'Summer': 1, 'Winter': 0}, occasion= ['casual','workout'])
-    j = cc.Boot(name = 'Rain Boots', color = 'green', material = 'rubber', season = {'Spring/Fall': 1, 'Summer': 1, 'Winter': 1}, waterproof = 1, occasion =['casual'])
-    k = cc.Boot(name = 'Chukka Boot', color = 'black', material = 'suede', season =  {'Spring/Fall': 1, 'Summer': 1, 'Winter': 1}, waterproof = -1, occasion = ['casual','party','work'])
-    l = cc.Flat(name = 'Flats', color = 'white', season = {'Spring/Fall': 1, 'Summer': 1, 'Winter': 0}, occasion=['casual','work','party'])
+    e = cc.Shirt(
+        name = 'Heavy Sweater', 
+        color = 'white', 
+        material = 'wool', 
+        season= {'Spring/Fall': 0, 'Summer': 0, 'Winter': 1}, 
+        occasion = ['casual','work','party'],
+        last_worn= datetime.date.today() - datetime.timedelta(days = random.randint(0,30)),
+        )
+
+    ############
+    #  bottom  #
+    ############
+
+    f = cc.Tights(
+        name = 'Yoga Pants', 
+        color = 'black', 
+        occasion = ['casual', 'workout','party'],
+        last_worn= datetime.date.today() - datetime.timedelta(days = random.randint(0,30)),
+        )
+
+    g = cc.Skirt(
+        name = 'Frilly Skirt', 
+        color = 'white', 
+        season= {'Spring/Fall': 0, 'Summer': 1, 'Winter': 0}, 
+        occasion = ['casual','party'],
+        last_worn= datetime.date.today() - datetime.timedelta(days = random.randint(0,30)),
+        )
+
+    h = cc.Pants(
+        name = 'Skinny Jeans', 
+        color = 'black', 
+        occasion = ['casual','party'],
+        last_worn= datetime.date.today() - datetime.timedelta(days = random.randint(0,30)),
+        )
+
+    ###########
+    #  shoe  #
+    ###########
+
+    i = cc.Sneaker(
+        name = 'Converse', 
+        color = 'blue', 
+        season = {'Spring/Fall': 1, 'Summer': 1, 'Winter': 0}, 
+        occasion= ['casual','workout'],
+        last_worn= datetime.date.today() - datetime.timedelta(days = random.randint(0,30)),
+        )
+
+    j = cc.Boot(
+        name = 'Rain Boots', 
+        color = 'green', 
+        material = 'rubber', 
+        season = {'Spring/Fall': 1, 'Summer': 1, 'Winter': 1}, 
+        waterproof = 1, 
+        occasion =['casual'],
+        last_worn= datetime.date.today() - datetime.timedelta(days = random.randint(0,30)),
+        )
+
+    k = cc.Boot(
+        name = 'Chukka Boot', 
+        color = 'black', 
+        material = 'suede', 
+        season =  {'Spring/Fall': 1, 'Summer': 1, 'Winter': 1}, 
+        waterproof = -1, 
+        occasion = ['casual','party','work'],
+        last_worn= datetime.date.today() - datetime.timedelta(days = random.randint(0,30)),
+        )
+
+    l = cc.Flat(
+        name = 'Flats', 
+        color = 'white', 
+        season = {'Spring/Fall': 1, 'Summer': 1, 'Winter': 0}, 
+        occasion=['casual','work','party'],
+        last_worn= datetime.date.today() - datetime.timedelta(days = random.randint(0,30)),
+        )
 
     to_closet = [a,b,c,d,e,f,g,h,i,j,h,l]
 
