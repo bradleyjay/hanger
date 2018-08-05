@@ -2,6 +2,8 @@ import copy
 import fake_lib
 import random
 import hanger_priority_queue
+import datetime
+
 '''
 
 Contains classes and functions to create a user, populate their closet, 
@@ -36,6 +38,7 @@ class User:
     def __init__(self, name, user_id):
         self.name = name
         self.user_id = user_id
+        self.outfit_count = None
 
         self.outerwear = hanger_priority_queue.Queue()
         self.top = hanger_priority_queue.Queue()
@@ -43,6 +46,18 @@ class User:
         self.shoe = hanger_priority_queue.Queue()
 
         self.closet = [self.outerwear, self.top, self.bottom, self.shoe]
+
+    def user_login_initialize(self):
+        '''
+        This will end up housing all the functions that run when a user logs
+        in. Closet should time sort itself, so you're not running that sort
+        when you request outfits (or, for safety, both places).
+    
+        Weather report.
+
+        '''
+        self.closet_sort()
+        self.weather_today = fake_lib.weather_report()
 
     def add_article(self, article):
         if article != None:
@@ -60,6 +75,17 @@ class User:
                     if article.ctype != None:
                         print(article)
                         print('\n')
+                    else:
+                        print('Error: Missing entry.')
+
+    def disp_closet_queue(self):
+        if self.closet != None:
+            for kind in self.closet:
+                print('\n' + 'CATEGORY')
+                for article in kind.items:
+                    if article.ctype != None:
+                        print(article.name)
+                        
                     else:
                         print('Error: Missing entry.')
 
@@ -81,7 +107,7 @@ class User:
 
         #working_closet = copy.deepcopy(self.closet) #no need with queue
         #weather_today = fake_lib.weather_report()
-        weather_today = fake_lib.weather_report()
+        
        
 
         # call private recommender function for each outfit required.
@@ -91,20 +117,61 @@ class User:
         
         self.closet_sort()
         self.picked_list = []
+        self.outfit_list = []
+        self.outfit_count = 2
 
         # 2 - Pick outfits, while building a "picked list" that marks what's
         # been chosen in a previous outfit already, so no repeats occur.
         
-
-        outfit1 = self._recommend(occasion, weather_today)
-        outfit2 = self._recommend(occasion, weather_today)
-
-      
-        self.print_outfit(outfit1,1)  
-        self.print_outfit(outfit2,2)
+        for i in range(0,int(self.outfit_count)):
+            outfit = self._recommend(occasion, self.weather_today)
+            self.outfit_list.append(outfit)
+        
        
-       #note: still no update of last worn, or re-enqueue
+    def user_outfit_choice(self):
+        '''
+        Iterate through outfit_list, report outfit name and the name of each 
+        item in the outfit.
+        '''
+        print(len(self.outfit_list))
+        print('\n CHOOSE AN OUTFIT')
+        for outfit in self.outfit_list:
+            if outfit != None:
+            
+                print('\n' + '---------------------')
+                print('Outfit ' + str(self.outfit_list.index(outfit)+1) + ': \n')
+
+                for article in outfit:
+                    if article != None:      # default is None, if nothing got picked
+                        print(article.name)
+                    else:
+                        print(None)
+
+                print('---------------------' + '\n')
+            else:
+                print('\n Error: Outfit not found. \n')
+        
+        i = input('Enter the number of the outfit you want to wear today')
+
+        if int(i) in range(1,len(self.outfit_list)):
+            for article in self.outfit_list[int(i)-1]:
+                if article != None:
+                    print("You're wearing " + article.name)
+                    article.last_worn = datetime.date.today()
+
+        else: 
+            print(str(i)+":" + 'Invalid Entry.')
+        
+        self.closet_sort() # lil heavy handed, but sort closet queues after selection
+        # resets queues to correct state, which moves position of chosen items.
+
+        
+
     def closet_sort(self):
+        '''
+        Sort each category in the closet in time order.
+        '''
+
         for kind in self.closet:
             if kind != None:
                 kind.time_sort()
@@ -182,27 +249,14 @@ class User:
                                 # add pointer to that item to picked_list
                                 self.picked_list.append(item)
                                 break
-                                
+
         return selected_item # for now, if this ends up being None, that's ok. 
         # later, needs some mechanism to not just pick the first good one, 
         # and also not to just take it straight away.
 
-    def print_outfit(self, outfit, outfit_number):
-        '''
-        Nicely format and print names of things in outfit.
-        '''
 
-        if outfit != None:
-            
-            print('\n' + '---------------------')
-            print('Outfit ' + str(outfit_number) + ': \n')
+    def print_picked_list(self):
+        for article in self.picked_list:
+            print(article.name)
 
-            for article in outfit:
-                if article != None:      # default is None, if nothing got picked
-                    print(article.name)
-                else:
-                    print(None)
-
-            print('---------------------' + '\n')
-        else:
-            print('\n Error: Outfit not found. \n')
+    
