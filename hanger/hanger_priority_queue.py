@@ -19,108 +19,70 @@ Note that min_heap does not gaurentee sorted list throughout - just that you can
 pop the minimum item cheaply off the top.
 
 Template: 
-Binary Min Heap: 
-
-Essentially LIST, kind of a tree. Smallest values float up to root (index 1). 
-UN-USED 0 index. Parents always smaller than children.
-
--No pointers, just index. 2*i = lc, 2*i + 1 = rc, i // 2 = parent. Root = 1
--On Insert, new value appended, then perc up
--On del_min, min (root) value returned, last value in list moved to root, perc down
--Always update size!
-
-1) Constructor: head list, size
-2) Insert, del_min
-3) Perc Up, Perc Down
-4) Min Child
+Queue
 
 '''
 from datetime import datetime
 
-class priority_queue():
-
-    # 1) Constructor: headlist, size
+class Queue:
     def __init__(self):
-        self.head_list = [0]
-        self.size = 0
+        self.items = []
+    def enqueue(self,item):
+        self.items.insert(0,item)
+    def dequeue(self):
+        return self.items.pop()
+    def is_empty(self):
+        return self.items == []
+    def size(self):
+        return len(self.items)
+    def time_sort(self):
+        self.items = self._mergesort(self.items)
 
+        ''' 
+merge sort:
 
+1) base case
+2) Save recursive call on L, R
+3) Add smaller value from each side to temp list using pos indicies, Result
+4) Add remaining
+5) Return result
 
-    # 2) insert, del_min
+'''
 
-    def insert(self,data):
+    def _mergesort(self,x):
 
-        # 1) append to list, 
-        # 2) increment size, 
-        # 3) perc up new value
-
-        self.head_list.append(data)
-        self.size += 1
-        self.perc_up(self.size)
-
-    
-    def del_min(self):
-        # 1) save root
-        # 2) copy last value in list to root, pop last value, size -= 1
-        # 3) perc down new root
-        if self.size == 1:
-            # if priority queue is empty, report that
-            return None
-
-        saved = self.head_list[1]                              # save root value
-
-        self.head_list[1] = self.head_list[self.size]          # copy last value to root
-        self.head_list.pop()                                   # pop last value
-        self.size -= 1                                         # deincriment size
+        # 1) base case (array size)
         
-        self.perc_down(1)                                      # perc down new root
-        return saved
+        if len(x) < 2:
+            return x
+        
+        # 2) Call recursives on L, R
 
+        mid = len(x) // 2
+        
+        left_half = self._mergesort(x[:mid])
+        right_half = self._mergesort(x[mid:])
 
+        #3) Add smaller value from each side to RESULT using pos indicies
 
-    # 3) Perc Up, Perc Down
+        result = []
+        i = 0
+        j = 0
 
-    def perc_up(self,i):
-        # 1) While not root, 
-        # 2) if parent > child, swap. 
-        # 3 )Move index to parent.
+        while i < len(left_half) and j < len(right_half):
+            
+            #this line might not have datetime implicitly, come back to this
+            if left_half[i].last_worn > right_half[j].last_worn:
+                result.append(right_half[j])
+                j += 1
+            else:
+                result.append(left_half[i])
+                i += 1
 
-        while i // 2 > 0:      # while not root
+        # 4) Add remaining elements
 
-            # parent > child? swap
-            if self.head_list[i//2].last_worn > self.head_list[i].last_worn:      
-                tmp = self.head_list[i//2]                 # save parent
-                self.head_list[i//2] = self.head_list[i]   # set parent to child
-                self.head_list[i] = tmp                    # set child to tmp
-            i = i // 2                                     # move up to the parent
+        result += left_half[i:]
+        result += right_half[j:]
 
-    def perc_down(self,i):
-        # 1) i * 2 is still in list (child exists)
-        # 2) min child < i? swap
-        # 3) set i to min child index
-
-        while (i * 2 <= self.size):
-            mc = self.min_child(i)
-
-            # if min child val smaller than current
-            if self.head_list[mc].last_worn < self.head_list[i].last_worn:     
-                tmp = self.head_list[i]                    # swap
-                self.head_list[i] = self.head_list[mc]
-                self.head_list[mc] = tmp
-            i = mc                                         # set to min child index
-
-
-    def min_child(self,i):
-        # 1) no rc? return lc
-        # 2) lc < rc? return lc
-        # 3) lc > rc, return rc
-
-        if self.size < (2*i+1):            # if theres no rc
-            return 2 * i                   # return lc
-        else:
-            #if lc < rc, return lc
-            if self.head_list[2*i].last_worn < self.head_list[2*i + 1].last_worn:   
-                return 2 * i
-            else:   
-                return 2*i + 1             # since lc > rc, return rc.
-
+        # 5) return RESULT
+        return result

@@ -37,10 +37,10 @@ class User:
         self.name = name
         self.user_id = user_id
 
-        self.outerwear = hanger_priority_queue.priority_queue()
-        self.top = hanger_priority_queue.priority_queue()
-        self.bottom = hanger_priority_queue.priority_queue()
-        self.shoe = hanger_priority_queue.priority_queue()
+        self.outerwear = hanger_priority_queue.Queue()
+        self.top = hanger_priority_queue.Queue()
+        self.bottom = hanger_priority_queue.Queue()
+        self.shoe = hanger_priority_queue.Queue()
 
         self.closet = [self.outerwear, self.top, self.bottom, self.shoe]
 
@@ -48,18 +48,16 @@ class User:
         if article != None:
             # each closet slot is a priority queue - calls insert() method 
             # to add to the queue
-            if article.ctype == 'outerwear': self.closet[0].insert(article)
-            if article.ctype == 'top': self.closet[1].insert(article)
-            if article.ctype == 'bottom': self.closet[2].insert(article)
-            if article.ctype == 'shoe': self.closet[3].insert(article)
+            if article.ctype == 'outerwear': self.closet[0].enqueue(article)
+            if article.ctype == 'top': self.closet[1].enqueue(article)
+            if article.ctype == 'bottom': self.closet[2].enqueue(article)
+            if article.ctype == 'shoe': self.closet[3].enqueue(article)
 
     def disp_closet(self):
         if self.closet != None:
             for kind in self.closet:
-                for article in kind.head_list:
-                    if article == 0:
-                        pass  # skip head list entry 0
-                    elif article.ctype != None:
+                for article in kind.items:
+                    if article.ctype != None:
                         print(article)
                         print('\n')
                     else:
@@ -81,18 +79,37 @@ class User:
         # Assuming python's passing the pointer to the closet, this should work as
         # written, otherwise, gotta find a way to keep using same one...
 
-        working_closet = copy.deepcopy(self.closet)
+        #working_closet = copy.deepcopy(self.closet) #no need with queue
         #weather_today = fake_lib.weather_report()
         weather_today = fake_lib.weather_report()
+       
+
         # call private recommender function for each outfit required.
-        outfit1 = self._recommend(working_closet, occasion, weather_today)
-        outfit2 = self._recommend(working_closet, occasion, weather_today)
+        # this should split now - 
+        #V 1 - update queues to make sure they're in order (not optimal, just for now...should be done at a less in-the-way time)
+        # prep for outfit building
+        
+        self.closet_sort()
+        self.picked_list = []
+
+        # 2 - Pick outfits, while building a "picked list" that marks what's
+        # been chosen in a previous outfit already, so no repeats occur.
+        
+
+        outfit1 = self._recommend(occasion, weather_today)
+        outfit2 = self._recommend(occasion, weather_today)
 
       
         self.print_outfit(outfit1,1)  
         self.print_outfit(outfit2,2)
        
-    def _recommend(self, closet, occasion, weather_today):
+       #note: still no update of last worn, or re-enqueue
+    def closet_sort(self):
+        for kind in self.closet:
+            if kind != None:
+                kind.time_sort()
+
+    def _recommend(self, occasion, weather_today):
 
         # outfit will be a list with a slot for each clothing type
         outfit = [None, None, None, None]
@@ -100,10 +117,10 @@ class User:
 
         # choose_article call needs outfit so it can check for clashes later.
 
-        outfit[0] = self.choose_article(closet, occasion, weather_today, outfit,'outerwear')
-        outfit[1] = self.choose_article(closet, occasion, weather_today, outfit,'top')
-        outfit[2] = self.choose_article(closet, occasion, weather_today, outfit,'bottom')
-        outfit[3] = self.choose_article(closet, occasion, weather_today, outfit,'shoe')
+        outfit[0] = self.choose_article(self.closet, occasion, weather_today, outfit,'outerwear')
+        outfit[1] = self.choose_article(self.closet, occasion, weather_today, outfit,'top')
+        outfit[2] = self.choose_article(self.closet, occasion, weather_today, outfit,'bottom')
+        outfit[3] = self.choose_article(self.closet, occasion, weather_today, outfit,'shoe')
 
         return outfit
 
@@ -145,49 +162,36 @@ class User:
         #placeholder for a "clashes" function call, checking each item picked vs.
         # those already selected. Likewise, "matches"
 
-        clashes = None 
+        clashes = False 
         matches = True
 
         selected_item = None  # default
 
 
-        # old way - iterate through list to find matching item
-        # for item in closet[s].head_list:
-        #     if item == 0:
-        #         pass # skip first entry in heap, it's a placeholder equal to 0
-        #     elif occasion in item.occasion:              # proper occasion?
-        #         if item.season[weather_today] == 1:     # season in dict = 1?
-        #             if clashes == None:
-        #                 if matches == True:
-        #                     selected_item = item
-        #                     closet[s].remove(item)
+        # list is last_worn sorted: so iterate through it til you find a match.
+        # if you dont, returns None, adds nothing to picked_list
+        for item in closet[s].items:
+            if item not in self.picked_list:
+                if occasion in item.occasion:              # proper occasion?
+                    if item.season[weather_today] == 1:     # season in dict = 1?
+                        if clashes == False:
+                            if matches == True:
+                                # add pointer to that item to outfit
+                                selected_item = item
 
-        # now, del_min til you hit a match:
-        found = False
-        while found == False:
-        popped = closet[s].del_min()
-        if popped == None:
-            # if there's nothing in the list, no article to choose
-            break
-        elif occasion in item.occasion:              # proper occasion?
-            if item.season[weather_today] == 1:     # season in dict = 1?
-                if clashes == None:
-                    if matches == True:
-                        selected_item = item
-                        
-                        # since selected, update last worn to NOW, add at end of PQ
-                        item.last_worn = datetime.date.today()
-                        closet[s].insert(item)
-
-                        ### UH OH, bigger problem. Pointer to item won't work, 
-                        ## and this isn't modifying the queue here, it's the COPY.
-                        ## This needs to just be a queue, enough already.
-
+                                # add pointer to that item to picked_list
+                                self.picked_list.append(item)
+                                break
+                                
         return selected_item # for now, if this ends up being None, that's ok. 
         # later, needs some mechanism to not just pick the first good one, 
         # and also not to just take it straight away.
 
     def print_outfit(self, outfit, outfit_number):
+        '''
+        Nicely format and print names of things in outfit.
+        '''
+
         if outfit != None:
             
             print('\n' + '---------------------')
