@@ -38,18 +38,18 @@ class Queue:
     def time_sort(self):
         self.items = self._mergesort(self.items)
 
-        ''' 
-merge sort:
-
-1) base case
-2) Save recursive call on L, R
-3) Add smaller value from each side to temp list using pos indicies, Result
-4) Add remaining
-5) Return result
-
-'''
-
     def _mergesort(self,x):
+        
+        '''
+        _Helper function, Mergesort: sorts list by last_worn 
+
+        1) base case
+        2) Save recursive call on L, R
+        3) Add smaller value from each side to temp list using pos indicies, Result
+        4) Add remaining
+        5) Return result
+
+        '''
 
         # 1) base case (array size)
         
