@@ -44,6 +44,8 @@ me.user_list[0].disp_closet_queue()    # print out state of queues after choice,
                                        # to show they were picked, and last_worn
                                        # was updated
 
+# what are next steps?
+
 
 # def recommender_engine(user):
 #     pass
